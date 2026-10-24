@@ -1,0 +1,698 @@
+{
+  "notice": "Synthetic educational fixture. Not live telemetry.",
+  "workflow": {
+    "id": "tls",
+    "version": 1,
+    "title": "TLS 1.3 · trust before application data",
+    "domain": "Cryptography",
+    "summary": "Explore a simplified full TLS 1.3 handshake over TCP, including certificate validation and an abort path.",
+    "references": [
+      {
+        "title": "IETF RFC 8446 · TLS 1.3",
+        "url": "https://www.rfc-editor.org/rfc/rfc8446.html"
+      },
+      {
+        "title": "IETF RFC 9293 · TCP",
+        "url": "https://www.rfc-editor.org/rfc/rfc9293.html"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "dns",
+        "title": "Resolve destination",
+        "op": "dns",
+        "description": "Resolve the training hostname conceptually.",
+        "detail": "DNS resolution gives an address; it does not prove server identity. This lab makes no network requests.",
+        "position": {
+          "x": 0,
+          "y": 80
+        },
+        "requires": [],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "syn",
+        "title": "TCP SYN",
+        "op": "syn",
+        "description": "Check firewall policy before connecting.",
+        "detail": "TLS in this lesson runs over TCP. HTTP/3 uses QUIC and is a different transport path.",
+        "position": {
+          "x": 280,
+          "y": 80
+        },
+        "requires": [],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "synack",
+        "title": "TCP SYN + ACK",
+        "op": "synack",
+        "description": "Acknowledge the client sequence.",
+        "detail": "The synthetic server has its own sequence space.",
+        "position": {
+          "x": 560,
+          "y": 80
+        },
+        "requires": [],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "ack",
+        "title": "TCP established",
+        "op": "ack",
+        "description": "Complete the transport handshake.",
+        "detail": "TCP alone provides no confidentiality.",
+        "position": {
+          "x": 840,
+          "y": 80
+        },
+        "requires": [],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "hello",
+        "title": "Client & Server Hello",
+        "op": "hello",
+        "description": "Negotiate TLS 1.3 and exchange key shares.",
+        "detail": "Ephemeral key agreement supports forward secrecy. No private key travels across the connection.",
+        "position": {
+          "x": 840,
+          "y": 300
+        },
+        "requires": [],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "certificate",
+        "title": "Validate certificate",
+        "op": "certificate",
+        "description": "Verify identity, trust chain and handshake signature.",
+        "detail": "Encrypted handshake messages follow ServerHello in TLS 1.3. A trust or hostname failure aborts the connection.",
+        "position": {
+          "x": 560,
+          "y": 300
+        },
+        "requires": [],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "keys",
+        "title": "Application keys",
+        "op": "keys",
+        "description": "Derive application traffic secrets and verify Finished.",
+        "detail": "TLS 1.3 uses a staged HKDF key schedule. This is a conceptual teaching view, not a cryptographic implementation.",
+        "position": {
+          "x": 280,
+          "y": 300
+        },
+        "requires": [],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "http",
+        "title": "Encrypted HTTP",
+        "op": "http",
+        "description": "Send protected application records.",
+        "detail": "Encryption hides content, not all metadata. Do not mistake an encrypted channel for a trustworthy application.",
+        "position": {
+          "x": 0,
+          "y": 300
+        },
+        "requires": [],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "audit",
+        "title": "Connection outcome",
+        "op": "audit",
+        "description": "Record success or the reason for aborting.",
+        "detail": "Never work around a certificate warning by disabling validation in a real client.",
+        "position": {
+          "x": 280,
+          "y": 520
+        },
+        "requires": [],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      }
+    ],
+    "edges": [
+      {
+        "id": "dns-syn",
+        "source": "dns",
+        "target": "syn",
+        "when": "always"
+      },
+      {
+        "id": "syn-synack",
+        "source": "syn",
+        "target": "synack",
+        "when": "yes"
+      },
+      {
+        "id": "syn-audit",
+        "source": "syn",
+        "target": "audit",
+        "when": "no"
+      },
+      {
+        "id": "synack-ack",
+        "source": "synack",
+        "target": "ack",
+        "when": "always"
+      },
+      {
+        "id": "ack-hello",
+        "source": "ack",
+        "target": "hello",
+        "when": "always"
+      },
+      {
+        "id": "hello-certificate",
+        "source": "hello",
+        "target": "certificate",
+        "when": "always"
+      },
+      {
+        "id": "certificate-keys",
+        "source": "certificate",
+        "target": "keys",
+        "when": "yes"
+      },
+      {
+        "id": "certificate-audit",
+        "source": "certificate",
+        "target": "audit",
+        "when": "no"
+      },
+      {
+        "id": "keys-http",
+        "source": "keys",
+        "target": "http",
+        "when": "always"
+      },
+      {
+        "id": "http-audit",
+        "source": "http",
+        "target": "audit",
+        "when": "always"
+      }
+    ]
+  },
+  "parameters": {
+    "suspicious": true,
+    "approved": false,
+    "certificateValid": true,
+    "firewallOpen": true,
+    "threshold": 5,
+    "enrichmentFails": false,
+    "scenario": "identity"
+  },
+  "events": [
+    {
+      "id": "tls-0",
+      "index": 0,
+      "nodeId": "dns",
+      "time": "2026-01-01T09:00:00.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity"
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "hostname": "training.example.test",
+        "address": "192.0.2.10",
+        "resolution": "Conceptual resolver response; no DNS request sent"
+      },
+      "message": "Resolve the training hostname conceptually.",
+      "status": "complete",
+      "edgeIds": [
+        "dns-syn"
+      ]
+    },
+    {
+      "id": "tls-1",
+      "index": 1,
+      "nodeId": "syn",
+      "time": "2026-01-01T09:00:01.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "hostname": "training.example.test",
+        "address": "192.0.2.10",
+        "resolution": "Conceptual resolver response; no DNS request sent"
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "hostname": "training.example.test",
+        "address": "192.0.2.10",
+        "resolution": "Conceptual resolver response; no DNS request sent",
+        "segment": "SYN",
+        "seq": 1000,
+        "port": 443,
+        "allowed": true
+      },
+      "message": "Check firewall policy before connecting.",
+      "status": "complete",
+      "edgeIds": [
+        "syn-synack"
+      ]
+    },
+    {
+      "id": "tls-2",
+      "index": 2,
+      "nodeId": "synack",
+      "time": "2026-01-01T09:00:02.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "hostname": "training.example.test",
+        "address": "192.0.2.10",
+        "resolution": "Conceptual resolver response; no DNS request sent",
+        "segment": "SYN",
+        "seq": 1000,
+        "port": 443,
+        "allowed": true
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "hostname": "training.example.test",
+        "address": "192.0.2.10",
+        "resolution": "Conceptual resolver response; no DNS request sent",
+        "segment": "SYN, ACK",
+        "seq": 1000,
+        "port": 443,
+        "allowed": true,
+        "serverSeq": 7000,
+        "ack": 1001
+      },
+      "message": "Acknowledge the client sequence.",
+      "status": "complete",
+      "edgeIds": [
+        "synack-ack"
+      ]
+    },
+    {
+      "id": "tls-3",
+      "index": 3,
+      "nodeId": "ack",
+      "time": "2026-01-01T09:00:03.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "hostname": "training.example.test",
+        "address": "192.0.2.10",
+        "resolution": "Conceptual resolver response; no DNS request sent",
+        "segment": "SYN, ACK",
+        "seq": 1000,
+        "port": 443,
+        "allowed": true,
+        "serverSeq": 7000,
+        "ack": 1001
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "hostname": "training.example.test",
+        "address": "192.0.2.10",
+        "resolution": "Conceptual resolver response; no DNS request sent",
+        "segment": "ACK",
+        "seq": 1000,
+        "port": 443,
+        "allowed": true,
+        "serverSeq": 7000,
+        "ack": 7001,
+        "clientSeq": 1001,
+        "tcpState": "ESTABLISHED"
+      },
+      "message": "Complete the transport handshake.",
+      "status": "complete",
+      "edgeIds": [
+        "ack-hello"
+      ]
+    },
+    {
+      "id": "tls-4",
+      "index": 4,
+      "nodeId": "hello",
+      "time": "2026-01-01T09:00:04.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "hostname": "training.example.test",
+        "address": "192.0.2.10",
+        "resolution": "Conceptual resolver response; no DNS request sent",
+        "segment": "ACK",
+        "seq": 1000,
+        "port": 443,
+        "allowed": true,
+        "serverSeq": 7000,
+        "ack": 7001,
+        "clientSeq": 1001,
+        "tcpState": "ESTABLISHED"
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "hostname": "training.example.test",
+        "address": "192.0.2.10",
+        "resolution": "Conceptual resolver response; no DNS request sent",
+        "segment": "ACK",
+        "seq": 1000,
+        "port": 443,
+        "allowed": true,
+        "serverSeq": 7000,
+        "ack": 7001,
+        "clientSeq": 1001,
+        "tcpState": "ESTABLISHED",
+        "tlsVersion": "1.3",
+        "messages": [
+          "ClientHello + key_share",
+          "ServerHello + key_share"
+        ],
+        "note": "Simplified full TLS 1.3 handshake; resumption and 0-RTT are excluded."
+      },
+      "message": "Negotiate TLS 1.3 and exchange key shares.",
+      "status": "complete",
+      "edgeIds": [
+        "hello-certificate"
+      ]
+    },
+    {
+      "id": "tls-5",
+      "index": 5,
+      "nodeId": "certificate",
+      "time": "2026-01-01T09:00:05.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "hostname": "training.example.test",
+        "address": "192.0.2.10",
+        "resolution": "Conceptual resolver response; no DNS request sent",
+        "segment": "ACK",
+        "seq": 1000,
+        "port": 443,
+        "allowed": true,
+        "serverSeq": 7000,
+        "ack": 7001,
+        "clientSeq": 1001,
+        "tcpState": "ESTABLISHED",
+        "tlsVersion": "1.3",
+        "messages": [
+          "ClientHello + key_share",
+          "ServerHello + key_share"
+        ],
+        "note": "Simplified full TLS 1.3 handshake; resumption and 0-RTT are excluded."
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "hostname": "training.example.test",
+        "address": "192.0.2.10",
+        "resolution": "Conceptual resolver response; no DNS request sent",
+        "segment": "ACK",
+        "seq": 1000,
+        "port": 443,
+        "allowed": true,
+        "serverSeq": 7000,
+        "ack": 7001,
+        "clientSeq": 1001,
+        "tcpState": "ESTABLISHED",
+        "tlsVersion": "1.3",
+        "messages": [
+          "EncryptedExtensions",
+          "Certificate",
+          "CertificateVerify",
+          "Finished"
+        ],
+        "note": "Simplified full TLS 1.3 handshake; resumption and 0-RTT are excluded.",
+        "certificateValid": true,
+        "checks": [
+          "Trust chain",
+          "Hostname",
+          "Validity",
+          "CertificateVerify signature"
+        ]
+      },
+      "message": "Verify identity, trust chain and handshake signature.",
+      "status": "complete",
+      "edgeIds": [
+        "certificate-keys"
+      ]
+    },
+    {
+      "id": "tls-6",
+      "index": 6,
+      "nodeId": "keys",
+      "time": "2026-01-01T09:00:06.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "hostname": "training.example.test",
+        "address": "192.0.2.10",
+        "resolution": "Conceptual resolver response; no DNS request sent",
+        "segment": "ACK",
+        "seq": 1000,
+        "port": 443,
+        "allowed": true,
+        "serverSeq": 7000,
+        "ack": 7001,
+        "clientSeq": 1001,
+        "tcpState": "ESTABLISHED",
+        "tlsVersion": "1.3",
+        "messages": [
+          "EncryptedExtensions",
+          "Certificate",
+          "CertificateVerify",
+          "Finished"
+        ],
+        "note": "Simplified full TLS 1.3 handshake; resumption and 0-RTT are excluded.",
+        "certificateValid": true,
+        "checks": [
+          "Trust chain",
+          "Hostname",
+          "Validity",
+          "CertificateVerify signature"
+        ]
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "hostname": "training.example.test",
+        "address": "192.0.2.10",
+        "resolution": "Conceptual resolver response; no DNS request sent",
+        "segment": "ACK",
+        "seq": 1000,
+        "port": 443,
+        "allowed": true,
+        "serverSeq": 7000,
+        "ack": 7001,
+        "clientSeq": 1001,
+        "tcpState": "ESTABLISHED",
+        "tlsVersion": "1.3",
+        "messages": [
+          "EncryptedExtensions",
+          "Certificate",
+          "CertificateVerify",
+          "Finished"
+        ],
+        "note": "Simplified full TLS 1.3 handshake; resumption and 0-RTT are excluded.",
+        "certificateValid": true,
+        "checks": [
+          "Trust chain",
+          "Hostname",
+          "Validity",
+          "CertificateVerify signature"
+        ],
+        "keyDerivation": "(EC)DHE shared secret + HKDF transcript-based key schedule",
+        "clientFinished": true,
+        "applicationTrafficKeys": "Established; no private key is transmitted"
+      },
+      "message": "Derive application traffic secrets and verify Finished.",
+      "status": "complete",
+      "edgeIds": [
+        "keys-http"
+      ]
+    },
+    {
+      "id": "tls-7",
+      "index": 7,
+      "nodeId": "http",
+      "time": "2026-01-01T09:00:07.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "hostname": "training.example.test",
+        "address": "192.0.2.10",
+        "resolution": "Conceptual resolver response; no DNS request sent",
+        "segment": "ACK",
+        "seq": 1000,
+        "port": 443,
+        "allowed": true,
+        "serverSeq": 7000,
+        "ack": 7001,
+        "clientSeq": 1001,
+        "tcpState": "ESTABLISHED",
+        "tlsVersion": "1.3",
+        "messages": [
+          "EncryptedExtensions",
+          "Certificate",
+          "CertificateVerify",
+          "Finished"
+        ],
+        "note": "Simplified full TLS 1.3 handshake; resumption and 0-RTT are excluded.",
+        "certificateValid": true,
+        "checks": [
+          "Trust chain",
+          "Hostname",
+          "Validity",
+          "CertificateVerify signature"
+        ],
+        "keyDerivation": "(EC)DHE shared secret + HKDF transcript-based key schedule",
+        "clientFinished": true,
+        "applicationTrafficKeys": "Established; no private key is transmitted"
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "hostname": "training.example.test",
+        "address": "192.0.2.10",
+        "resolution": "Conceptual resolver response; no DNS request sent",
+        "segment": "ACK",
+        "seq": 1000,
+        "port": 443,
+        "allowed": true,
+        "serverSeq": 7000,
+        "ack": 7001,
+        "clientSeq": 1001,
+        "tcpState": "ESTABLISHED",
+        "tlsVersion": "1.3",
+        "messages": [
+          "EncryptedExtensions",
+          "Certificate",
+          "CertificateVerify",
+          "Finished"
+        ],
+        "note": "Metadata such as peer addresses and timing remains observable.",
+        "certificateValid": true,
+        "checks": [
+          "Trust chain",
+          "Hostname",
+          "Validity",
+          "CertificateVerify signature"
+        ],
+        "keyDerivation": "(EC)DHE shared secret + HKDF transcript-based key schedule",
+        "clientFinished": true,
+        "applicationTrafficKeys": "Established; no private key is transmitted",
+        "applicationData": "Encrypted HTTP request and response",
+        "confidentiality": true
+      },
+      "message": "Send protected application records.",
+      "status": "complete",
+      "edgeIds": [
+        "http-audit"
+      ]
+    },
+    {
+      "id": "tls-8",
+      "index": 8,
+      "nodeId": "audit",
+      "time": "2026-01-01T09:00:08.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "hostname": "training.example.test",
+        "address": "192.0.2.10",
+        "resolution": "Conceptual resolver response; no DNS request sent",
+        "segment": "ACK",
+        "seq": 1000,
+        "port": 443,
+        "allowed": true,
+        "serverSeq": 7000,
+        "ack": 7001,
+        "clientSeq": 1001,
+        "tcpState": "ESTABLISHED",
+        "tlsVersion": "1.3",
+        "messages": [
+          "EncryptedExtensions",
+          "Certificate",
+          "CertificateVerify",
+          "Finished"
+        ],
+        "note": "Metadata such as peer addresses and timing remains observable.",
+        "certificateValid": true,
+        "checks": [
+          "Trust chain",
+          "Hostname",
+          "Validity",
+          "CertificateVerify signature"
+        ],
+        "keyDerivation": "(EC)DHE shared secret + HKDF transcript-based key schedule",
+        "clientFinished": true,
+        "applicationTrafficKeys": "Established; no private key is transmitted",
+        "applicationData": "Encrypted HTTP request and response",
+        "confidentiality": true
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "hostname": "training.example.test",
+        "address": "192.0.2.10",
+        "resolution": "Conceptual resolver response; no DNS request sent",
+        "segment": "ACK",
+        "seq": 1000,
+        "port": 443,
+        "allowed": true,
+        "serverSeq": 7000,
+        "ack": 7001,
+        "clientSeq": 1001,
+        "tcpState": "ESTABLISHED",
+        "tlsVersion": "1.3",
+        "messages": [
+          "EncryptedExtensions",
+          "Certificate",
+          "CertificateVerify",
+          "Finished"
+        ],
+        "note": "Metadata such as peer addresses and timing remains observable.",
+        "certificateValid": true,
+        "checks": [
+          "Trust chain",
+          "Hostname",
+          "Validity",
+          "CertificateVerify signature"
+        ],
+        "keyDerivation": "(EC)DHE shared secret + HKDF transcript-based key schedule",
+        "clientFinished": true,
+        "applicationTrafficKeys": "Established; no private key is transmitted",
+        "applicationData": "Encrypted HTTP request and response",
+        "confidentiality": true,
+        "outcome": "Recorded; no external action",
+        "auditId": "LAB-tls-1001"
+      },
+      "message": "Record success or the reason for aborting.",
+      "status": "complete",
+      "edgeIds": []
+    }
+  ]
+}

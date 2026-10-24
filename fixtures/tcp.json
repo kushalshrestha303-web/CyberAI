@@ -1,0 +1,342 @@
+{
+  "notice": "Synthetic educational fixture. Not live telemetry.",
+  "workflow": {
+    "id": "tcp",
+    "version": 1,
+    "title": "TCP · establish a reliable connection",
+    "domain": "Networking",
+    "summary": "Trace SYN, SYN-ACK and ACK. Inspect sequence numbers, then block the connection and compare the result.",
+    "references": [
+      {
+        "title": "IETF RFC 9293 · TCP",
+        "url": "https://www.rfc-editor.org/rfc/rfc9293.html"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "client",
+        "title": "Client initiates",
+        "op": "trigger",
+        "description": "A client prepares a synthetic connection.",
+        "detail": "The client opens an ephemeral source port to server port 443. TCP provides an ordered byte stream, not encryption.",
+        "position": {
+          "x": 0,
+          "y": 160
+        },
+        "requires": [],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "syn",
+        "title": "SYN · firewall check",
+        "op": "syn",
+        "description": "Send SYN with initial sequence number 1000.",
+        "detail": "SYN consumes one sequence number. If policy drops it, retransmission and timeout occur instead of a handshake.",
+        "position": {
+          "x": 300,
+          "y": 160
+        },
+        "requires": [],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "synack",
+        "title": "Server · SYN + ACK",
+        "op": "synack",
+        "description": "The server acknowledges 1001 and sends sequence 7000.",
+        "detail": "Acknowledgment numbers indicate the next expected sequence number. TCP sequence spaces are independent in each direction.",
+        "position": {
+          "x": 600,
+          "y": 80
+        },
+        "requires": [
+          "allowed"
+        ],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "ack",
+        "title": "Client · ACK",
+        "op": "ack",
+        "description": "Acknowledge 7001; the connection is established.",
+        "detail": "The final ACK completes this simplified handshake. Data loss, retransmission and simultaneous open are outside this lesson.",
+        "position": {
+          "x": 900,
+          "y": 80
+        },
+        "requires": [
+          "serverSeq"
+        ],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "audit",
+        "title": "Connection outcome",
+        "op": "audit",
+        "description": "Record the established or blocked outcome.",
+        "detail": "A successful TCP handshake does not establish identity or confidentiality. Continue to TLS to add these protections.",
+        "position": {
+          "x": 1200,
+          "y": 180
+        },
+        "requires": [],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      }
+    ],
+    "edges": [
+      {
+        "id": "client-syn",
+        "source": "client",
+        "target": "syn",
+        "when": "always"
+      },
+      {
+        "id": "syn-synack",
+        "source": "syn",
+        "target": "synack",
+        "when": "yes"
+      },
+      {
+        "id": "syn-audit",
+        "source": "syn",
+        "target": "audit",
+        "when": "no"
+      },
+      {
+        "id": "synack-ack",
+        "source": "synack",
+        "target": "ack",
+        "when": "always"
+      },
+      {
+        "id": "ack-audit",
+        "source": "ack",
+        "target": "audit",
+        "when": "always"
+      }
+    ]
+  },
+  "parameters": {
+    "suspicious": true,
+    "approved": false,
+    "certificateValid": true,
+    "firewallOpen": true,
+    "threshold": 5,
+    "enrichmentFails": false,
+    "scenario": "identity"
+  },
+  "events": [
+    {
+      "id": "tcp-0",
+      "index": 0,
+      "nodeId": "client",
+      "time": "2026-01-01T09:00:00.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity"
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device."
+      },
+      "message": "A client prepares a synthetic connection.",
+      "status": "complete",
+      "edgeIds": [
+        "client-syn"
+      ]
+    },
+    {
+      "id": "tcp-1",
+      "index": 1,
+      "nodeId": "syn",
+      "time": "2026-01-01T09:00:01.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device."
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "segment": "SYN",
+        "seq": 1000,
+        "port": 443,
+        "allowed": true
+      },
+      "message": "Send SYN with initial sequence number 1000.",
+      "status": "complete",
+      "edgeIds": [
+        "syn-synack"
+      ]
+    },
+    {
+      "id": "tcp-2",
+      "index": 2,
+      "nodeId": "synack",
+      "time": "2026-01-01T09:00:02.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "segment": "SYN",
+        "seq": 1000,
+        "port": 443,
+        "allowed": true
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "segment": "SYN, ACK",
+        "seq": 1000,
+        "port": 443,
+        "allowed": true,
+        "serverSeq": 7000,
+        "ack": 1001
+      },
+      "message": "The server acknowledges 1001 and sends sequence 7000.",
+      "status": "complete",
+      "edgeIds": [
+        "synack-ack"
+      ]
+    },
+    {
+      "id": "tcp-3",
+      "index": 3,
+      "nodeId": "ack",
+      "time": "2026-01-01T09:00:03.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "segment": "SYN, ACK",
+        "seq": 1000,
+        "port": 443,
+        "allowed": true,
+        "serverSeq": 7000,
+        "ack": 1001
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "segment": "ACK",
+        "seq": 1000,
+        "port": 443,
+        "allowed": true,
+        "serverSeq": 7000,
+        "ack": 7001,
+        "clientSeq": 1001,
+        "tcpState": "ESTABLISHED"
+      },
+      "message": "Acknowledge 7001; the connection is established.",
+      "status": "complete",
+      "edgeIds": [
+        "ack-audit"
+      ]
+    },
+    {
+      "id": "tcp-4",
+      "index": 4,
+      "nodeId": "audit",
+      "time": "2026-01-01T09:00:04.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "segment": "ACK",
+        "seq": 1000,
+        "port": 443,
+        "allowed": true,
+        "serverSeq": 7000,
+        "ack": 7001,
+        "clientSeq": 1001,
+        "tcpState": "ESTABLISHED"
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "segment": "ACK",
+        "seq": 1000,
+        "port": 443,
+        "allowed": true,
+        "serverSeq": 7000,
+        "ack": 7001,
+        "clientSeq": 1001,
+        "tcpState": "ESTABLISHED",
+        "outcome": "Recorded; no external action",
+        "auditId": "LAB-tcp-1001"
+      },
+      "message": "Record the established or blocked outcome.",
+      "status": "complete",
+      "edgeIds": []
+    }
+  ]
+}

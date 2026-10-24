@@ -1,0 +1,883 @@
+{
+  "notice": "Synthetic educational fixture. Not live telemetry.",
+  "workflow": {
+    "id": "soc",
+    "version": 1,
+    "title": "Suspicious login → authorized response",
+    "domain": "Security operations",
+    "summary": "Follow one synthetic event through collection, detection, evidence review and a guarded response. Change the scenario or decision to explore a different path.",
+    "references": [
+      {
+        "title": "Microsoft · Investigate risky users",
+        "url": "https://learn.microsoft.com/en-us/entra/id-protection/howto-identity-protection-investigate-risk"
+      },
+      {
+        "title": "NIST SP 800-61 Rev. 3 · Incident response",
+        "url": "https://csrc.nist.gov/pubs/sp/800/61/r3/final"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "event",
+        "title": "Sign-in event",
+        "op": "trigger",
+        "description": "A synthetic event enters the lab.",
+        "detail": "Documentation addresses and example.test accounts represent no real person. The selected scenario determines the evidence.",
+        "position": {
+          "x": 0,
+          "y": 80
+        },
+        "requires": [],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "parse",
+        "title": "Parse & normalize",
+        "op": "parse",
+        "description": "Validate and normalize the event envelope.",
+        "detail": "Keep source fields and original timestamps. Normalization improves consistency without adding evidence.",
+        "position": {
+          "x": 280,
+          "y": 80
+        },
+        "requires": [
+          "eventId"
+        ],
+        "produces": [
+          "normalized"
+        ],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "collect",
+        "title": "Telemetry collection",
+        "op": "collect",
+        "description": "Collect only scoped lab telemetry.",
+        "detail": "Real collectors need least-privilege authentication, health monitoring and explicit tenant scope.",
+        "position": {
+          "x": 560,
+          "y": 80
+        },
+        "requires": [
+          "normalized"
+        ],
+        "produces": [
+          "collected"
+        ],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "siem",
+        "title": "SIEM ingestion",
+        "op": "siem",
+        "description": "Place the event in the synthetic log index.",
+        "detail": "The sample query is educational pseudocode. It does not run against Sentinel, Splunk or a production SIEM.",
+        "position": {
+          "x": 840,
+          "y": 80
+        },
+        "requires": [
+          "collected"
+        ],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "detect",
+        "title": "Detection rule",
+        "op": "detect",
+        "description": "Evaluate explicit demonstration rules.",
+        "detail": "A rule match is a lead, not proof of compromise. Brute-force uses the adjustable failure threshold; other scenarios use contextual signals.",
+        "position": {
+          "x": 840,
+          "y": 300
+        },
+        "requires": [],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "alert",
+        "title": "Alert triage",
+        "op": "alert",
+        "description": "Create an alert only when the rule matches.",
+        "detail": "Preserve raw evidence and reduce duplicate notifications. Match severity to analyst handling, not an invented probability.",
+        "position": {
+          "x": 560,
+          "y": 300
+        },
+        "requires": [
+          "matched"
+        ],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "enrich",
+        "title": "Context enrichment",
+        "op": "enrich",
+        "description": "Attach local scenario context.",
+        "detail": "This simulation makes no third-party requests. A failed enrichment preserves uncertainty instead of marking the entity safe.",
+        "position": {
+          "x": 280,
+          "y": 300
+        },
+        "requires": [],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "analyst",
+        "title": "Analyst investigation",
+        "op": "investigate",
+        "description": "Check the evidence and alternative explanations.",
+        "detail": "Corroborate device history, user activity, source logs and authorized changes. Keep confidence separate from severity.",
+        "position": {
+          "x": 0,
+          "y": 300
+        },
+        "requires": [],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "decision",
+        "title": "Response decision",
+        "op": "decide",
+        "description": "Route a matched signal to human review.",
+        "detail": "An unmatched signal follows the no-action path. A match still requires explicit approval before the simulated response.",
+        "position": {
+          "x": 0,
+          "y": 520
+        },
+        "requires": [],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "approval",
+        "title": "Human approval",
+        "op": "approval",
+        "description": "Require explicit approval for the proposed action.",
+        "detail": "The approval checkbox authorizes this lab simulation only. It never authorizes an action against a real tenant.",
+        "position": {
+          "x": 280,
+          "y": 520
+        },
+        "requires": [],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "respond",
+        "title": "Response proposal",
+        "op": "respond",
+        "description": "Prepare a reversible containment proposal.",
+        "detail": "Dry-run only: no account is disabled, host isolated or firewall changed. A production adapter would require scoped authorization and audit.",
+        "position": {
+          "x": 560,
+          "y": 520
+        },
+        "requires": [
+          "approved"
+        ],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "audit",
+        "title": "Resolution & audit",
+        "op": "audit",
+        "description": "Record what happened and what remains uncertain.",
+        "detail": "Document the evidence, analyst decision, approval state, actions and verification plan. No real notification is sent.",
+        "position": {
+          "x": 840,
+          "y": 520
+        },
+        "requires": [],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      }
+    ],
+    "edges": [
+      {
+        "id": "event-parse",
+        "source": "event",
+        "target": "parse",
+        "when": "always"
+      },
+      {
+        "id": "parse-collect",
+        "source": "parse",
+        "target": "collect",
+        "when": "always"
+      },
+      {
+        "id": "collect-siem",
+        "source": "collect",
+        "target": "siem",
+        "when": "always"
+      },
+      {
+        "id": "siem-detect",
+        "source": "siem",
+        "target": "detect",
+        "when": "always"
+      },
+      {
+        "id": "detect-alert",
+        "source": "detect",
+        "target": "alert",
+        "when": "always"
+      },
+      {
+        "id": "alert-enrich",
+        "source": "alert",
+        "target": "enrich",
+        "when": "always"
+      },
+      {
+        "id": "enrich-analyst",
+        "source": "enrich",
+        "target": "analyst",
+        "when": "always"
+      },
+      {
+        "id": "analyst-decision",
+        "source": "analyst",
+        "target": "decision",
+        "when": "always"
+      },
+      {
+        "id": "decision-approval",
+        "source": "decision",
+        "target": "approval",
+        "when": "yes"
+      },
+      {
+        "id": "decision-audit",
+        "source": "decision",
+        "target": "audit",
+        "when": "no"
+      },
+      {
+        "id": "approval-respond",
+        "source": "approval",
+        "target": "respond",
+        "when": "yes"
+      },
+      {
+        "id": "approval-audit",
+        "source": "approval",
+        "target": "audit",
+        "when": "no"
+      },
+      {
+        "id": "respond-audit",
+        "source": "respond",
+        "target": "audit",
+        "when": "always"
+      }
+    ]
+  },
+  "parameters": {
+    "suspicious": true,
+    "approved": false,
+    "certificateValid": true,
+    "firewallOpen": true,
+    "threshold": 5,
+    "enrichmentFails": false,
+    "scenario": "identity"
+  },
+  "events": [
+    {
+      "id": "soc-0",
+      "index": 0,
+      "nodeId": "event",
+      "time": "2026-01-01T09:00:00.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity"
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device."
+      },
+      "message": "A synthetic event enters the lab.",
+      "status": "complete",
+      "edgeIds": [
+        "event-parse"
+      ]
+    },
+    {
+      "id": "soc-1",
+      "index": 1,
+      "nodeId": "parse",
+      "time": "2026-01-01T09:00:01.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device."
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "normalized": true,
+        "timestamp": "2026-01-01T09:00:00Z"
+      },
+      "message": "Validate and normalize the event envelope.",
+      "status": "complete",
+      "edgeIds": [
+        "parse-collect"
+      ]
+    },
+    {
+      "id": "soc-2",
+      "index": 2,
+      "nodeId": "collect",
+      "time": "2026-01-01T09:00:02.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "normalized": true,
+        "timestamp": "2026-01-01T09:00:00Z"
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "normalized": true,
+        "timestamp": "2026-01-01T09:00:00Z",
+        "collected": true,
+        "scope": "Authorized synthetic lab only"
+      },
+      "message": "Collect only scoped lab telemetry.",
+      "status": "complete",
+      "edgeIds": [
+        "collect-siem"
+      ]
+    },
+    {
+      "id": "soc-3",
+      "index": 3,
+      "nodeId": "siem",
+      "time": "2026-01-01T09:00:03.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "normalized": true,
+        "timestamp": "2026-01-01T09:00:00Z",
+        "collected": true,
+        "scope": "Authorized synthetic lab only"
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "normalized": true,
+        "timestamp": "2026-01-01T09:00:00Z",
+        "collected": true,
+        "scope": "Authorized synthetic lab only",
+        "index": "lab-events",
+        "query": "where newDevice != \"normal\""
+      },
+      "message": "Place the event in the synthetic log index.",
+      "status": "complete",
+      "edgeIds": [
+        "siem-detect"
+      ]
+    },
+    {
+      "id": "soc-4",
+      "index": 4,
+      "nodeId": "detect",
+      "time": "2026-01-01T09:00:04.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "normalized": true,
+        "timestamp": "2026-01-01T09:00:00Z",
+        "collected": true,
+        "scope": "Authorized synthetic lab only",
+        "index": "lab-events",
+        "query": "where newDevice != \"normal\""
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "normalized": true,
+        "timestamp": "2026-01-01T09:00:00Z",
+        "collected": true,
+        "scope": "Authorized synthetic lab only",
+        "index": "lab-events",
+        "query": "where newDevice != \"normal\"",
+        "rule": "Unfamiliar device with repeated failures; corroborate with MFA and user context.",
+        "matched": true,
+        "threshold": 5
+      },
+      "message": "Evaluate explicit demonstration rules.",
+      "status": "complete",
+      "edgeIds": [
+        "detect-alert"
+      ]
+    },
+    {
+      "id": "soc-5",
+      "index": 5,
+      "nodeId": "alert",
+      "time": "2026-01-01T09:00:05.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "normalized": true,
+        "timestamp": "2026-01-01T09:00:00Z",
+        "collected": true,
+        "scope": "Authorized synthetic lab only",
+        "index": "lab-events",
+        "query": "where newDevice != \"normal\"",
+        "rule": "Unfamiliar device with repeated failures; corroborate with MFA and user context.",
+        "matched": true,
+        "threshold": 5
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "normalized": true,
+        "timestamp": "2026-01-01T09:00:00Z",
+        "collected": true,
+        "scope": "Authorized synthetic lab only",
+        "index": "lab-events",
+        "query": "where newDevice != \"normal\"",
+        "rule": "Unfamiliar device with repeated failures; corroborate with MFA and user context.",
+        "matched": true,
+        "threshold": 5,
+        "alert": "LAB-ALERT-1001",
+        "severity": "Review required"
+      },
+      "message": "Create an alert only when the rule matches.",
+      "status": "complete",
+      "edgeIds": [
+        "alert-enrich"
+      ]
+    },
+    {
+      "id": "soc-6",
+      "index": 6,
+      "nodeId": "enrich",
+      "time": "2026-01-01T09:00:06.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "normalized": true,
+        "timestamp": "2026-01-01T09:00:00Z",
+        "collected": true,
+        "scope": "Authorized synthetic lab only",
+        "index": "lab-events",
+        "query": "where newDevice != \"normal\"",
+        "rule": "Unfamiliar device with repeated failures; corroborate with MFA and user context.",
+        "matched": true,
+        "threshold": 5,
+        "alert": "LAB-ALERT-1001",
+        "severity": "Review required"
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "normalized": true,
+        "timestamp": "2026-01-01T09:00:00Z",
+        "collected": true,
+        "scope": "Authorized synthetic lab only",
+        "index": "lab-events",
+        "query": "where newDevice != \"normal\"",
+        "rule": "Unfamiliar device with repeated failures; corroborate with MFA and user context.",
+        "matched": true,
+        "threshold": 5,
+        "alert": "LAB-ALERT-1001",
+        "severity": "Review required",
+        "enrichment": "Local context attached",
+        "attempts": 1,
+        "latencyMs": 100
+      },
+      "message": "Attach local scenario context.",
+      "status": "complete",
+      "edgeIds": [
+        "enrich-analyst"
+      ]
+    },
+    {
+      "id": "soc-7",
+      "index": 7,
+      "nodeId": "analyst",
+      "time": "2026-01-01T09:00:07.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "normalized": true,
+        "timestamp": "2026-01-01T09:00:00Z",
+        "collected": true,
+        "scope": "Authorized synthetic lab only",
+        "index": "lab-events",
+        "query": "where newDevice != \"normal\"",
+        "rule": "Unfamiliar device with repeated failures; corroborate with MFA and user context.",
+        "matched": true,
+        "threshold": 5,
+        "alert": "LAB-ALERT-1001",
+        "severity": "Review required",
+        "enrichment": "Local context attached",
+        "attempts": 1,
+        "latencyMs": 100
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "normalized": true,
+        "timestamp": "2026-01-01T09:00:00Z",
+        "collected": true,
+        "scope": "Authorized synthetic lab only",
+        "index": "lab-events",
+        "query": "where newDevice != \"normal\"",
+        "rule": "Unfamiliar device with repeated failures; corroborate with MFA and user context.",
+        "matched": true,
+        "threshold": 5,
+        "alert": "LAB-ALERT-1001",
+        "severity": "Review required",
+        "enrichment": "Local context attached",
+        "attempts": 1,
+        "latencyMs": 100,
+        "analystReview": "Check asset ownership, source evidence, relevant logs and false-positive explanations.",
+        "confidence": "Insufficient evidence for automatic containment"
+      },
+      "message": "Check the evidence and alternative explanations.",
+      "status": "complete",
+      "edgeIds": [
+        "analyst-decision"
+      ]
+    },
+    {
+      "id": "soc-8",
+      "index": 8,
+      "nodeId": "decision",
+      "time": "2026-01-01T09:00:08.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "normalized": true,
+        "timestamp": "2026-01-01T09:00:00Z",
+        "collected": true,
+        "scope": "Authorized synthetic lab only",
+        "index": "lab-events",
+        "query": "where newDevice != \"normal\"",
+        "rule": "Unfamiliar device with repeated failures; corroborate with MFA and user context.",
+        "matched": true,
+        "threshold": 5,
+        "alert": "LAB-ALERT-1001",
+        "severity": "Review required",
+        "enrichment": "Local context attached",
+        "attempts": 1,
+        "latencyMs": 100,
+        "analystReview": "Check asset ownership, source evidence, relevant logs and false-positive explanations.",
+        "confidence": "Insufficient evidence for automatic containment"
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "normalized": true,
+        "timestamp": "2026-01-01T09:00:00Z",
+        "collected": true,
+        "scope": "Authorized synthetic lab only",
+        "index": "lab-events",
+        "query": "where newDevice != \"normal\"",
+        "rule": "Unfamiliar device with repeated failures; corroborate with MFA and user context.",
+        "matched": true,
+        "threshold": 5,
+        "alert": "LAB-ALERT-1001",
+        "severity": "Review required",
+        "enrichment": "Local context attached",
+        "attempts": 1,
+        "latencyMs": 100,
+        "analystReview": "Check asset ownership, source evidence, relevant logs and false-positive explanations.",
+        "confidence": "Insufficient evidence for automatic containment",
+        "decision": "review",
+        "reason": "Demonstration rule matched; human authorization required."
+      },
+      "message": "Route a matched signal to human review.",
+      "status": "complete",
+      "edgeIds": [
+        "decision-approval"
+      ]
+    },
+    {
+      "id": "soc-9",
+      "index": 9,
+      "nodeId": "approval",
+      "time": "2026-01-01T09:00:09.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "normalized": true,
+        "timestamp": "2026-01-01T09:00:00Z",
+        "collected": true,
+        "scope": "Authorized synthetic lab only",
+        "index": "lab-events",
+        "query": "where newDevice != \"normal\"",
+        "rule": "Unfamiliar device with repeated failures; corroborate with MFA and user context.",
+        "matched": true,
+        "threshold": 5,
+        "alert": "LAB-ALERT-1001",
+        "severity": "Review required",
+        "enrichment": "Local context attached",
+        "attempts": 1,
+        "latencyMs": 100,
+        "analystReview": "Check asset ownership, source evidence, relevant logs and false-positive explanations.",
+        "confidence": "Insufficient evidence for automatic containment",
+        "decision": "review",
+        "reason": "Demonstration rule matched; human authorization required."
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "normalized": true,
+        "timestamp": "2026-01-01T09:00:00Z",
+        "collected": true,
+        "scope": "Authorized synthetic lab only",
+        "index": "lab-events",
+        "query": "where newDevice != \"normal\"",
+        "rule": "Unfamiliar device with repeated failures; corroborate with MFA and user context.",
+        "matched": true,
+        "threshold": 5,
+        "alert": "LAB-ALERT-1001",
+        "severity": "Review required",
+        "enrichment": "Local context attached",
+        "attempts": 1,
+        "latencyMs": 100,
+        "analystReview": "Check asset ownership, source evidence, relevant logs and false-positive explanations.",
+        "confidence": "Insufficient evidence for automatic containment",
+        "decision": "review",
+        "reason": "Demonstration rule matched; human authorization required.",
+        "approved": false,
+        "approvalScope": "Simulation only"
+      },
+      "message": "Approval withheld. No response action is permitted.",
+      "status": "warning",
+      "edgeIds": [
+        "approval-audit"
+      ]
+    },
+    {
+      "id": "soc-10",
+      "index": 10,
+      "nodeId": "audit",
+      "time": "2026-01-01T09:00:10.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "normalized": true,
+        "timestamp": "2026-01-01T09:00:00Z",
+        "collected": true,
+        "scope": "Authorized synthetic lab only",
+        "index": "lab-events",
+        "query": "where newDevice != \"normal\"",
+        "rule": "Unfamiliar device with repeated failures; corroborate with MFA and user context.",
+        "matched": true,
+        "threshold": 5,
+        "alert": "LAB-ALERT-1001",
+        "severity": "Review required",
+        "enrichment": "Local context attached",
+        "attempts": 1,
+        "latencyMs": 100,
+        "analystReview": "Check asset ownership, source evidence, relevant logs and false-positive explanations.",
+        "confidence": "Insufficient evidence for automatic containment",
+        "decision": "review",
+        "reason": "Demonstration rule matched; human authorization required.",
+        "approved": false,
+        "approvalScope": "Simulation only"
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "normalized": true,
+        "timestamp": "2026-01-01T09:00:00Z",
+        "collected": true,
+        "scope": "Authorized synthetic lab only",
+        "index": "lab-events",
+        "query": "where newDevice != \"normal\"",
+        "rule": "Unfamiliar device with repeated failures; corroborate with MFA and user context.",
+        "matched": true,
+        "threshold": 5,
+        "alert": "LAB-ALERT-1001",
+        "severity": "Review required",
+        "enrichment": "Local context attached",
+        "attempts": 1,
+        "latencyMs": 100,
+        "analystReview": "Check asset ownership, source evidence, relevant logs and false-positive explanations.",
+        "confidence": "Insufficient evidence for automatic containment",
+        "decision": "review",
+        "reason": "Demonstration rule matched; human authorization required.",
+        "approved": false,
+        "approvalScope": "Simulation only",
+        "outcome": "Recorded; no external action",
+        "auditId": "LAB-soc-1001"
+      },
+      "message": "Record what happened and what remains uncertain.",
+      "status": "complete",
+      "edgeIds": []
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS tenants (id uuid PRIMARY KEY, name text NOT NULL, created_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS users (id uuid PRIMARY KEY, tenant_id uuid NOT NULL REFERENCES tenants(id), email text UNIQUE NOT NULL, password_hash text NOT NULL, role text NOT NULL CHECK(role IN ('admin','analyst','learner')), plan text NOT NULL DEFAULT 'free' CHECK(plan IN ('free','student','professional','team')), created_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS sessions (token_hash text PRIMARY KEY, user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE, expires_at timestamptz NOT NULL);
+CREATE INDEX IF NOT EXISTS sessions_expiry_idx ON sessions(expires_at);
+CREATE TABLE IF NOT EXISTS user_state (user_id uuid PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE, tenant_id uuid NOT NULL REFERENCES tenants(id), data jsonb NOT NULL DEFAULT '{}', updated_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS provider_cache (key text PRIMARY KEY, data jsonb NOT NULL, updated_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS provider_health (provider text PRIMARY KEY, status text NOT NULL, last_success timestamptz, last_attempt timestamptz NOT NULL DEFAULT now(), message text);
+CREATE TABLE IF NOT EXISTS rate_buckets (key text PRIMARY KEY, count integer NOT NULL, expires_at timestamptz NOT NULL);
+CREATE TABLE IF NOT EXISTS audit_log (id bigserial PRIMARY KEY, tenant_id uuid REFERENCES tenants(id), user_id uuid REFERENCES users(id), action text NOT NULL, metadata jsonb NOT NULL DEFAULT '{}', created_at timestamptz NOT NULL DEFAULT now());
+CREATE INDEX IF NOT EXISTS audit_tenant_time_idx ON audit_log(tenant_id,created_at DESC);

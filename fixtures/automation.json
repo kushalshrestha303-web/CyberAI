@@ -1,0 +1,550 @@
+{
+  "notice": "Synthetic educational fixture. Not live telemetry.",
+  "workflow": {
+    "id": "automation",
+    "version": 1,
+    "title": "Evidence review & approved response",
+    "domain": "Automation",
+    "summary": "An editable educational template. All adapters are simulated; no outbound action is possible.",
+    "references": [
+      {
+        "title": "NIST SP 800-61 Rev. 3 · Incident response",
+        "url": "https://csrc.nist.gov/pubs/sp/800/61/r3/final"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "trigger",
+        "title": "Incident trigger",
+        "op": "trigger",
+        "description": "Receive a synthetic lab event.",
+        "detail": "Production connector example: Sentinel incident webhook; use read-only incident scope during testing.",
+        "position": {
+          "x": 0,
+          "y": 160
+        },
+        "requires": [],
+        "produces": [
+          "eventId"
+        ],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "parse",
+        "title": "Parse envelope",
+        "op": "parse",
+        "description": "Validate a normalized event.",
+        "detail": "Reject missing eventId; preserve provenance.",
+        "position": {
+          "x": 280,
+          "y": 160
+        },
+        "requires": [
+          "eventId"
+        ],
+        "produces": [
+          "normalized"
+        ],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "detect",
+        "title": "Evaluate rule",
+        "op": "detect",
+        "description": "Evaluate the scenario detection logic.",
+        "detail": "The decision remains explicit and reproducible.",
+        "position": {
+          "x": 560,
+          "y": 160
+        },
+        "requires": [
+          "normalized"
+        ],
+        "produces": [
+          "matched"
+        ],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "enrich",
+        "title": "Enrich context",
+        "op": "enrich",
+        "description": "Attach local context with bounded retries.",
+        "detail": "Expected latency is 100 ms in the simulator. Reduce timeout below that to exercise failure.",
+        "position": {
+          "x": 840,
+          "y": 160
+        },
+        "requires": [],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "decision",
+        "title": "Conditional decision",
+        "op": "decide",
+        "description": "Choose review or no action.",
+        "detail": "True routes to approval; false records a no-action outcome.",
+        "position": {
+          "x": 840,
+          "y": 390
+        },
+        "requires": [
+          "matched"
+        ],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "approval",
+        "title": "Human approval",
+        "op": "approval",
+        "description": "Require approval before response.",
+        "detail": "Missing approval always bypasses response.",
+        "position": {
+          "x": 560,
+          "y": 390
+        },
+        "requires": [],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "respond",
+        "title": "Response proposal",
+        "op": "respond",
+        "description": "Preview the authorized action.",
+        "detail": "Dry run only. A production adapter is deliberately absent.",
+        "position": {
+          "x": 280,
+          "y": 390
+        },
+        "requires": [
+          "approved"
+        ],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "notify",
+        "title": "Notification preview",
+        "op": "notify",
+        "description": "Prepare a notification without sending.",
+        "detail": "Connector examples: Teams or Slack. No credentials or messages are used.",
+        "position": {
+          "x": 0,
+          "y": 390
+        },
+        "requires": [],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "audit",
+        "title": "Audit outcome",
+        "op": "audit",
+        "description": "Record the execution trace.",
+        "detail": "Export the JSON spec and retain execution history.",
+        "position": {
+          "x": 0,
+          "y": 610
+        },
+        "requires": [],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      }
+    ],
+    "edges": [
+      {
+        "id": "trigger-parse",
+        "source": "trigger",
+        "target": "parse",
+        "when": "always"
+      },
+      {
+        "id": "parse-detect",
+        "source": "parse",
+        "target": "detect",
+        "when": "always"
+      },
+      {
+        "id": "detect-enrich",
+        "source": "detect",
+        "target": "enrich",
+        "when": "always"
+      },
+      {
+        "id": "enrich-decision",
+        "source": "enrich",
+        "target": "decision",
+        "when": "always"
+      },
+      {
+        "id": "decision-approval",
+        "source": "decision",
+        "target": "approval",
+        "when": "yes"
+      },
+      {
+        "id": "decision-audit",
+        "source": "decision",
+        "target": "audit",
+        "when": "no"
+      },
+      {
+        "id": "approval-respond",
+        "source": "approval",
+        "target": "respond",
+        "when": "yes"
+      },
+      {
+        "id": "approval-audit",
+        "source": "approval",
+        "target": "audit",
+        "when": "no"
+      },
+      {
+        "id": "respond-notify",
+        "source": "respond",
+        "target": "notify",
+        "when": "always"
+      },
+      {
+        "id": "notify-audit",
+        "source": "notify",
+        "target": "audit",
+        "when": "always"
+      }
+    ]
+  },
+  "parameters": {
+    "suspicious": true,
+    "approved": false,
+    "certificateValid": true,
+    "firewallOpen": true,
+    "threshold": 5,
+    "enrichmentFails": false,
+    "scenario": "identity"
+  },
+  "events": [
+    {
+      "id": "automation-0",
+      "index": 0,
+      "nodeId": "trigger",
+      "time": "2026-01-01T09:00:00.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity"
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device."
+      },
+      "message": "Receive a synthetic lab event.",
+      "status": "complete",
+      "edgeIds": [
+        "trigger-parse"
+      ]
+    },
+    {
+      "id": "automation-1",
+      "index": 1,
+      "nodeId": "parse",
+      "time": "2026-01-01T09:00:01.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device."
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "normalized": true,
+        "timestamp": "2026-01-01T09:00:00Z"
+      },
+      "message": "Validate a normalized event.",
+      "status": "complete",
+      "edgeIds": [
+        "parse-detect"
+      ]
+    },
+    {
+      "id": "automation-2",
+      "index": 2,
+      "nodeId": "detect",
+      "time": "2026-01-01T09:00:02.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "normalized": true,
+        "timestamp": "2026-01-01T09:00:00Z"
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "normalized": true,
+        "timestamp": "2026-01-01T09:00:00Z",
+        "rule": "Unfamiliar device with repeated failures; corroborate with MFA and user context.",
+        "matched": true,
+        "threshold": 5
+      },
+      "message": "Evaluate the scenario detection logic.",
+      "status": "complete",
+      "edgeIds": [
+        "detect-enrich"
+      ]
+    },
+    {
+      "id": "automation-3",
+      "index": 3,
+      "nodeId": "enrich",
+      "time": "2026-01-01T09:00:03.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "normalized": true,
+        "timestamp": "2026-01-01T09:00:00Z",
+        "rule": "Unfamiliar device with repeated failures; corroborate with MFA and user context.",
+        "matched": true,
+        "threshold": 5
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "normalized": true,
+        "timestamp": "2026-01-01T09:00:00Z",
+        "rule": "Unfamiliar device with repeated failures; corroborate with MFA and user context.",
+        "matched": true,
+        "threshold": 5,
+        "enrichment": "Local context attached",
+        "attempts": 1,
+        "latencyMs": 100
+      },
+      "message": "Attach local context with bounded retries.",
+      "status": "complete",
+      "edgeIds": [
+        "enrich-decision"
+      ]
+    },
+    {
+      "id": "automation-4",
+      "index": 4,
+      "nodeId": "decision",
+      "time": "2026-01-01T09:00:04.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "normalized": true,
+        "timestamp": "2026-01-01T09:00:00Z",
+        "rule": "Unfamiliar device with repeated failures; corroborate with MFA and user context.",
+        "matched": true,
+        "threshold": 5,
+        "enrichment": "Local context attached",
+        "attempts": 1,
+        "latencyMs": 100
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "normalized": true,
+        "timestamp": "2026-01-01T09:00:00Z",
+        "rule": "Unfamiliar device with repeated failures; corroborate with MFA and user context.",
+        "matched": true,
+        "threshold": 5,
+        "enrichment": "Local context attached",
+        "attempts": 1,
+        "latencyMs": 100,
+        "decision": "review",
+        "reason": "Demonstration rule matched; human authorization required."
+      },
+      "message": "Choose review or no action.",
+      "status": "complete",
+      "edgeIds": [
+        "decision-approval"
+      ]
+    },
+    {
+      "id": "automation-5",
+      "index": 5,
+      "nodeId": "approval",
+      "time": "2026-01-01T09:00:05.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "normalized": true,
+        "timestamp": "2026-01-01T09:00:00Z",
+        "rule": "Unfamiliar device with repeated failures; corroborate with MFA and user context.",
+        "matched": true,
+        "threshold": 5,
+        "enrichment": "Local context attached",
+        "attempts": 1,
+        "latencyMs": 100,
+        "decision": "review",
+        "reason": "Demonstration rule matched; human authorization required."
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "normalized": true,
+        "timestamp": "2026-01-01T09:00:00Z",
+        "rule": "Unfamiliar device with repeated failures; corroborate with MFA and user context.",
+        "matched": true,
+        "threshold": 5,
+        "enrichment": "Local context attached",
+        "attempts": 1,
+        "latencyMs": 100,
+        "decision": "review",
+        "reason": "Demonstration rule matched; human authorization required.",
+        "approved": false,
+        "approvalScope": "Simulation only"
+      },
+      "message": "Approval withheld. No response action is permitted.",
+      "status": "warning",
+      "edgeIds": [
+        "approval-audit"
+      ]
+    },
+    {
+      "id": "automation-6",
+      "index": 6,
+      "nodeId": "audit",
+      "time": "2026-01-01T09:00:06.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "normalized": true,
+        "timestamp": "2026-01-01T09:00:00Z",
+        "rule": "Unfamiliar device with repeated failures; corroborate with MFA and user context.",
+        "matched": true,
+        "threshold": 5,
+        "enrichment": "Local context attached",
+        "attempts": 1,
+        "latencyMs": 100,
+        "decision": "review",
+        "reason": "Demonstration rule matched; human authorization required.",
+        "approved": false,
+        "approvalScope": "Simulation only"
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "eventId": "SYN-1001",
+        "user": "alex@example.test",
+        "ip": "192.0.2.42",
+        "source": "Entra sign-in (synthetic)",
+        "failureCount": 8,
+        "newDevice": "true",
+        "evidence": "8 failed sign-ins followed by a success from an unfamiliar device.",
+        "normalized": true,
+        "timestamp": "2026-01-01T09:00:00Z",
+        "rule": "Unfamiliar device with repeated failures; corroborate with MFA and user context.",
+        "matched": true,
+        "threshold": 5,
+        "enrichment": "Local context attached",
+        "attempts": 1,
+        "latencyMs": 100,
+        "decision": "review",
+        "reason": "Demonstration rule matched; human authorization required.",
+        "approved": false,
+        "approvalScope": "Simulation only",
+        "outcome": "Recorded; no external action",
+        "auditId": "LAB-automation-1001"
+      },
+      "message": "Record the execution trace.",
+      "status": "complete",
+      "edgeIds": []
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "name": "cyber-ai",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "CYBER AI — evidence-driven intelligence and deterministic cybersecurity learning",
+  "scripts": {
+    "dev": "next dev --webpack --hostname 127.0.0.1 --port 3100",
+    "build": "next build --webpack",
+    "start": "next start --hostname 127.0.0.1 --port 3100",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "tsx --test tests/*.test.ts",
+    "db:migrate": "node --env-file-if-exists=.env.local scripts/migrate.mjs",
+    "db:seed": "node --env-file-if-exists=.env.local scripts/seed.mjs",
+    "verify:feeds": "tsx scripts/verify-feeds.ts",
+    "format": "prettier --write src tests scripts db docs *.md *.json *.ts *.mjs",
+    "test:api": "node scripts/smoke-api.mjs",
+    "fixtures": "tsx scripts/generate-fixtures.ts"
+  },
+  "dependencies": {
+    "@xyflow/react": "^12.9.0",
+    "lucide-react": "^0.468.0",
+    "next": "^16.0.0",
+    "pg": "^8.16.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.11",
+    "@types/node": "^24.0.0",
+    "@types/pg": "^8.15.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "^16.0.0",
+    "prettier": "^3.9.10",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

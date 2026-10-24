@@ -1,0 +1,517 @@
+{
+  "notice": "Synthetic educational fixture. Not live telemetry.",
+  "workflow": {
+    "id": "automation-intel",
+    "version": 1,
+    "title": "KEV applicability & remediation review",
+    "domain": "Automation",
+    "summary": "Preserve the selected CVE, validate hypothetical asset applicability and prepare a remediation ticket after approval. No patch or external ticket is created.",
+    "references": [
+      {
+        "title": "CISA · Known Exploited Vulnerabilities",
+        "url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog"
+      },
+      {
+        "title": "NIST SP 800-61 Rev. 3 · Incident response",
+        "url": "https://csrc.nist.gov/pubs/sp/800/61/r3/final"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "source",
+        "title": "CISA intelligence",
+        "op": "source",
+        "description": "Load the selected record with provenance.",
+        "detail": "CISA KEV records known exploitation. It does not report which of your systems are affected or compromised.",
+        "position": {
+          "x": 0,
+          "y": 80
+        },
+        "requires": [],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "enrich",
+        "title": "Evidence enrichment",
+        "op": "enrich",
+        "description": "Preserve source context and enrichment limits.",
+        "detail": "Optional NVD and FIRST requests are explicit lookups. This graph attaches the selected evidence and never invents a CVSS score or ATT&CK technique.",
+        "position": {
+          "x": 300,
+          "y": 80
+        },
+        "requires": [],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "normalize",
+        "title": "Normalize record",
+        "op": "normalize",
+        "description": "Keep severity, likelihood and confidence separate.",
+        "detail": "A missing score remains unknown. Catalog addition date is not the date exploitation first occurred.",
+        "position": {
+          "x": 600,
+          "y": 80
+        },
+        "requires": [],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "correlate",
+        "title": "Asset correlation",
+        "op": "correlate",
+        "description": "Compare against a hypothetical lab inventory.",
+        "detail": "The affected-asset toggle is a teaching assumption. Confirm version, exposure and vendor applicability before real remediation.",
+        "position": {
+          "x": 900,
+          "y": 80
+        },
+        "requires": [],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "analyst",
+        "title": "Analyst review",
+        "op": "investigate",
+        "description": "Review required actions and supporting evidence.",
+        "detail": "Read the vendor advisory and confirm affected versions. Generic KEV membership does not justify a specific exploit signature.",
+        "position": {
+          "x": 900,
+          "y": 320
+        },
+        "requires": [],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "decision",
+        "title": "Protective decision",
+        "op": "decide",
+        "description": "Choose a review path based on applicability.",
+        "detail": "No affected lab asset means no proposed response. Preserve the record for future monitoring.",
+        "position": {
+          "x": 600,
+          "y": 320
+        },
+        "requires": [],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "approval",
+        "title": "Change approval",
+        "op": "approval",
+        "description": "Review a bounded remediation proposal.",
+        "detail": "Approval here is only for a dry run. Real remediation needs authorization, a maintenance plan and rollback.",
+        "position": {
+          "x": 300,
+          "y": 320
+        },
+        "requires": [],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "respond",
+        "title": "Remediation proposal",
+        "op": "respond",
+        "description": "Prepare a remediation ticket without execution.",
+        "detail": "Use the CISA required action as source context; verify vendor instructions and organizational constraints.",
+        "position": {
+          "x": 0,
+          "y": 320
+        },
+        "requires": [
+          "approved"
+        ],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      },
+      {
+        "id": "audit",
+        "title": "Verify & record",
+        "op": "audit",
+        "description": "Record the proposed action and verification criteria.",
+        "detail": "Verify deployed version and coverage after authorized remediation. No asset scan or patch installation occurs here.",
+        "position": {
+          "x": 300,
+          "y": 550
+        },
+        "requires": [],
+        "produces": [],
+        "timeoutMs": 5000,
+        "retries": 1
+      }
+    ],
+    "edges": [
+      {
+        "id": "source-enrich",
+        "source": "source",
+        "target": "enrich",
+        "when": "always"
+      },
+      {
+        "id": "enrich-normalize",
+        "source": "enrich",
+        "target": "normalize",
+        "when": "always"
+      },
+      {
+        "id": "normalize-correlate",
+        "source": "normalize",
+        "target": "correlate",
+        "when": "always"
+      },
+      {
+        "id": "correlate-analyst",
+        "source": "correlate",
+        "target": "analyst",
+        "when": "always"
+      },
+      {
+        "id": "analyst-decision",
+        "source": "analyst",
+        "target": "decision",
+        "when": "always"
+      },
+      {
+        "id": "decision-approval",
+        "source": "decision",
+        "target": "approval",
+        "when": "yes"
+      },
+      {
+        "id": "decision-audit",
+        "source": "decision",
+        "target": "audit",
+        "when": "no"
+      },
+      {
+        "id": "approval-respond",
+        "source": "approval",
+        "target": "respond",
+        "when": "yes"
+      },
+      {
+        "id": "approval-audit",
+        "source": "approval",
+        "target": "audit",
+        "when": "no"
+      },
+      {
+        "id": "respond-audit",
+        "source": "respond",
+        "target": "audit",
+        "when": "always"
+      }
+    ]
+  },
+  "parameters": {
+    "suspicious": true,
+    "approved": false,
+    "certificateValid": true,
+    "firewallOpen": true,
+    "threshold": 5,
+    "enrichmentFails": false,
+    "scenario": "identity"
+  },
+  "events": [
+    {
+      "id": "automation-intel-0",
+      "index": 0,
+      "nodeId": "source",
+      "time": "2026-01-01T09:00:00.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity"
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "provenance": "Synthetic fixture; choose a live KEV entry for source evidence"
+      },
+      "message": "Load the selected record with provenance.",
+      "status": "complete",
+      "edgeIds": [
+        "source-enrich"
+      ]
+    },
+    {
+      "id": "automation-intel-1",
+      "index": 1,
+      "nodeId": "enrich",
+      "time": "2026-01-01T09:00:01.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "provenance": "Synthetic fixture; choose a live KEV entry for source evidence"
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "provenance": "Synthetic fixture; choose a live KEV entry for source evidence",
+        "enrichment": "Local context attached",
+        "attempts": 1,
+        "latencyMs": 100
+      },
+      "message": "Preserve source context and enrichment limits.",
+      "status": "complete",
+      "edgeIds": [
+        "enrich-normalize"
+      ]
+    },
+    {
+      "id": "automation-intel-2",
+      "index": 2,
+      "nodeId": "normalize",
+      "time": "2026-01-01T09:00:02.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "provenance": "Synthetic fixture; choose a live KEV entry for source evidence",
+        "enrichment": "Local context attached",
+        "attempts": 1,
+        "latencyMs": 100
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "provenance": "Synthetic fixture; choose a live KEV entry for source evidence",
+        "enrichment": "Local context attached",
+        "attempts": 1,
+        "latencyMs": 100,
+        "normalized": true,
+        "distinction": "KEV confirms exploitation reported by CISA, not compromise of your organization."
+      },
+      "message": "Keep severity, likelihood and confidence separate.",
+      "status": "complete",
+      "edgeIds": [
+        "normalize-correlate"
+      ]
+    },
+    {
+      "id": "automation-intel-3",
+      "index": 3,
+      "nodeId": "correlate",
+      "time": "2026-01-01T09:00:03.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "provenance": "Synthetic fixture; choose a live KEV entry for source evidence",
+        "enrichment": "Local context attached",
+        "attempts": 1,
+        "latencyMs": 100,
+        "normalized": true,
+        "distinction": "KEV confirms exploitation reported by CISA, not compromise of your organization."
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "provenance": "Synthetic fixture; choose a live KEV entry for source evidence",
+        "enrichment": "Local context attached",
+        "attempts": 1,
+        "latencyMs": 100,
+        "normalized": true,
+        "distinction": "KEV confirms exploitation reported by CISA, not compromise of your organization.",
+        "affected": true,
+        "assetMatch": "Hypothetical affected product in synthetic inventory",
+        "limits": "Asset correlation is a lab assumption; no customer telemetry is connected."
+      },
+      "message": "Compare against a hypothetical lab inventory.",
+      "status": "complete",
+      "edgeIds": [
+        "correlate-analyst"
+      ]
+    },
+    {
+      "id": "automation-intel-4",
+      "index": 4,
+      "nodeId": "analyst",
+      "time": "2026-01-01T09:00:04.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "provenance": "Synthetic fixture; choose a live KEV entry for source evidence",
+        "enrichment": "Local context attached",
+        "attempts": 1,
+        "latencyMs": 100,
+        "normalized": true,
+        "distinction": "KEV confirms exploitation reported by CISA, not compromise of your organization.",
+        "affected": true,
+        "assetMatch": "Hypothetical affected product in synthetic inventory",
+        "limits": "Asset correlation is a lab assumption; no customer telemetry is connected."
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "provenance": "Synthetic fixture; choose a live KEV entry for source evidence",
+        "enrichment": "Local context attached",
+        "attempts": 1,
+        "latencyMs": 100,
+        "normalized": true,
+        "distinction": "KEV confirms exploitation reported by CISA, not compromise of your organization.",
+        "affected": true,
+        "assetMatch": "Hypothetical affected product in synthetic inventory",
+        "limits": "Asset correlation is a lab assumption; no customer telemetry is connected.",
+        "analystReview": "Check asset ownership, source evidence, relevant logs and false-positive explanations.",
+        "confidence": "Insufficient evidence for automatic containment"
+      },
+      "message": "Review required actions and supporting evidence.",
+      "status": "complete",
+      "edgeIds": [
+        "analyst-decision"
+      ]
+    },
+    {
+      "id": "automation-intel-5",
+      "index": 5,
+      "nodeId": "decision",
+      "time": "2026-01-01T09:00:05.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "provenance": "Synthetic fixture; choose a live KEV entry for source evidence",
+        "enrichment": "Local context attached",
+        "attempts": 1,
+        "latencyMs": 100,
+        "normalized": true,
+        "distinction": "KEV confirms exploitation reported by CISA, not compromise of your organization.",
+        "affected": true,
+        "assetMatch": "Hypothetical affected product in synthetic inventory",
+        "limits": "Asset correlation is a lab assumption; no customer telemetry is connected.",
+        "analystReview": "Check asset ownership, source evidence, relevant logs and false-positive explanations.",
+        "confidence": "Insufficient evidence for automatic containment"
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "provenance": "Synthetic fixture; choose a live KEV entry for source evidence",
+        "enrichment": "Local context attached",
+        "attempts": 1,
+        "latencyMs": 100,
+        "normalized": true,
+        "distinction": "KEV confirms exploitation reported by CISA, not compromise of your organization.",
+        "affected": true,
+        "assetMatch": "Hypothetical affected product in synthetic inventory",
+        "limits": "Asset correlation is a lab assumption; no customer telemetry is connected.",
+        "analystReview": "Check asset ownership, source evidence, relevant logs and false-positive explanations.",
+        "confidence": "Insufficient evidence for automatic containment",
+        "decision": "review",
+        "reason": "Demonstration rule matched; human authorization required."
+      },
+      "message": "Choose a review path based on applicability.",
+      "status": "complete",
+      "edgeIds": [
+        "decision-approval"
+      ]
+    },
+    {
+      "id": "automation-intel-6",
+      "index": 6,
+      "nodeId": "approval",
+      "time": "2026-01-01T09:00:06.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "provenance": "Synthetic fixture; choose a live KEV entry for source evidence",
+        "enrichment": "Local context attached",
+        "attempts": 1,
+        "latencyMs": 100,
+        "normalized": true,
+        "distinction": "KEV confirms exploitation reported by CISA, not compromise of your organization.",
+        "affected": true,
+        "assetMatch": "Hypothetical affected product in synthetic inventory",
+        "limits": "Asset correlation is a lab assumption; no customer telemetry is connected.",
+        "analystReview": "Check asset ownership, source evidence, relevant logs and false-positive explanations.",
+        "confidence": "Insufficient evidence for automatic containment",
+        "decision": "review",
+        "reason": "Demonstration rule matched; human authorization required."
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "provenance": "Synthetic fixture; choose a live KEV entry for source evidence",
+        "enrichment": "Local context attached",
+        "attempts": 1,
+        "latencyMs": 100,
+        "normalized": true,
+        "distinction": "KEV confirms exploitation reported by CISA, not compromise of your organization.",
+        "affected": true,
+        "assetMatch": "Hypothetical affected product in synthetic inventory",
+        "limits": "Asset correlation is a lab assumption; no customer telemetry is connected.",
+        "analystReview": "Check asset ownership, source evidence, relevant logs and false-positive explanations.",
+        "confidence": "Insufficient evidence for automatic containment",
+        "decision": "review",
+        "reason": "Demonstration rule matched; human authorization required.",
+        "approved": false,
+        "approvalScope": "Simulation only"
+      },
+      "message": "Approval withheld. No response action is permitted.",
+      "status": "warning",
+      "edgeIds": [
+        "approval-audit"
+      ]
+    },
+    {
+      "id": "automation-intel-7",
+      "index": 7,
+      "nodeId": "audit",
+      "time": "2026-01-01T09:00:07.000Z",
+      "input": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "provenance": "Synthetic fixture; choose a live KEV entry for source evidence",
+        "enrichment": "Local context attached",
+        "attempts": 1,
+        "latencyMs": 100,
+        "normalized": true,
+        "distinction": "KEV confirms exploitation reported by CISA, not compromise of your organization.",
+        "affected": true,
+        "assetMatch": "Hypothetical affected product in synthetic inventory",
+        "limits": "Asset correlation is a lab assumption; no customer telemetry is connected.",
+        "analystReview": "Check asset ownership, source evidence, relevant logs and false-positive explanations.",
+        "confidence": "Insufficient evidence for automatic containment",
+        "decision": "review",
+        "reason": "Demonstration rule matched; human authorization required.",
+        "approved": false,
+        "approvalScope": "Simulation only"
+      },
+      "output": {
+        "mode": "simulation",
+        "scenario": "identity",
+        "provenance": "Synthetic fixture; choose a live KEV entry for source evidence",
+        "enrichment": "Local context attached",
+        "attempts": 1,
+        "latencyMs": 100,
+        "normalized": true,
+        "distinction": "KEV confirms exploitation reported by CISA, not compromise of your organization.",
+        "affected": true,
+        "assetMatch": "Hypothetical affected product in synthetic inventory",
+        "limits": "Asset correlation is a lab assumption; no customer telemetry is connected.",
+        "analystReview": "Check asset ownership, source evidence, relevant logs and false-positive explanations.",
+        "confidence": "Insufficient evidence for automatic containment",
+        "decision": "review",
+        "reason": "Demonstration rule matched; human authorization required.",
+        "approved": false,
+        "approvalScope": "Simulation only",
+        "outcome": "Recorded; no external action",
+        "auditId": "LAB-automation-intel-1001"
+      },
+      "message": "Record the proposed action and verification criteria.",
+      "status": "complete",
+      "edgeIds": []
+    }
+  ]
+}
